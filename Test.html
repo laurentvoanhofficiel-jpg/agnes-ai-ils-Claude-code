@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Moebius Film Generator — 100 Images</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif;background:#1a0f0a;color:#e8dcc8;min-height:100vh;padding:1rem 1rem 14rem;font-size:14px;line-height:1.5}
+.wrap{max-width:1600px;margin:0 auto}
+header{text-align:center;padding:1.5rem 0;border-bottom:1px solid #3d2418;margin-bottom:1.5rem}
+h1{font-family:Georgia,serif;font-size:2.4rem;font-weight:300;letter-spacing:.02em;margin-bottom:.4rem;background:linear-gradient(135deg,#6bafc4 0%,#d4a56a 50%,#e87b35 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;line-height:1.05}
+.sub{font-family:Georgia,serif;font-style:italic;font-size:.85rem;color:#8a7a5c}
+.kata{font-size:.7rem;letter-spacing:.4em;color:#6bafc4;opacity:.75;text-transform:uppercase;margin-bottom:.5rem}
+.banner{background:linear-gradient(135deg,rgba(107,175,196,.08),rgba(212,165,106,.06));border:1px solid #3d2418;border-left:3px solid #6bafc4;border-radius:4px;padding:1rem 1.15rem;font-size:.78rem;color:#a89578;margin-bottom:1.2rem;line-height:1.65;font-family:Georgia,serif}
+.banner strong{color:#e8dcc8}
+.card{background:#231409;border:1px solid #3d2418;border-radius:4px;margin-bottom:1rem;overflow:hidden}
+.card-head{padding:.85rem 1rem;border-bottom:1px solid #3d2418;display:flex;justify-content:space-between;align-items:center;font-size:.72rem;text-transform:uppercase;letter-spacing:.15em;color:#d4c5a8;font-weight:600;font-family:Georgia,serif}
+.card-head .badge{font-size:.6rem;padding:.15rem .5rem;border:1px solid #6bafc4;color:#6bafc4;border-radius:2px;letter-spacing:.1em;background:rgba(107,175,196,.15)}
+.card-body{padding:1rem}
+textarea{width:100%;background:#150c06;border:1px solid #3d2418;border-radius:4px;padding:.7rem .85rem;font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:.78rem;color:#e8dcc8;outline:none;min-height:80px;resize:vertical;line-height:1.55}
+textarea:focus{border-color:#6bafc4;box-shadow:0 0 0 3px rgba(107,175,196,.15)}
+.btn{width:100%;padding:.75rem;border-radius:4px;font-size:.75rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;border:1px solid;transition:all .15s;font-family:Georgia,serif}
+.btn-amber{background:linear-gradient(135deg,rgba(212,165,106,.18),rgba(232,123,53,.1));border-color:#d4a56a;color:#d4a56a}
+.btn-amber:hover:not(:disabled){background:rgba(212,165,106,.28)}
+.btn-amber:disabled{opacity:.3;cursor:not-allowed}
+.btn-slate{background:transparent;border-color:#3d2418;color:#a89578;font-size:.66rem;padding:.5rem;font-family:-apple-system,sans-serif}
+.btn-slate:hover:not(:disabled){color:#6bafc4;border-color:#6bafc4}
+.btn-slate:disabled{opacity:.3;cursor:not-allowed}
+.btn-mega{background:linear-gradient(135deg,#6bafc4,#d4a56a,#e87b35);border:none;color:#1a0f0a;padding:1rem;font-size:.85rem;letter-spacing:.18em;border-radius:5px;box-shadow:0 4px 20px rgba(107,175,196,.3);font-family:Georgia,serif;font-weight:700}
+.btn-mega:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 6px 28px rgba(107,175,196,.5)}
+.btn-mega:disabled{opacity:.35;cursor:not-allowed;transform:none;box-shadow:none}
+.row{display:flex;gap:.5rem;margin-top:.6rem;flex-wrap:wrap}
+.row .btn{width:auto;flex:1;min-width:100px}
+.status{display:flex;align-items:center;gap:.5rem;padding:.5rem .75rem;background:#150c06;border:1px solid #3d2418;border-radius:4px;font-size:.72rem;color:#8a7a5c;margin-top:.5rem}
+.status.ok{background:rgba(16,185,129,.08);border-color:#065f46;color:#34d399}
+.status.err{background:rgba(196,69,54,.1);border-color:#7f1d1d;color:#f87171}
+.status.warn{background:rgba(229,193,90,.08);border-color:#8b5a2b;color:#e5c15a}
+.status .dot{width:6px;height:6px;border-radius:50%;background:#4a3828;flex-shrink:0}
+.status.ok .dot{background:#10b981;box-shadow:0 0 6px #10b981}
+.status.err .dot{background:#c44536}
+.status.warn .dot{background:#e5c15a}
+.hint{font-size:.68rem;color:#8a7a5c;margin-top:.4rem;font-family:Georgia,serif;font-style:italic}
+.images-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:.6rem;margin-bottom:.6rem}
+.slot{border:2px dashed #4a3828;border-radius:4px;padding:.5rem;text-align:center;cursor:pointer;position:relative;transition:all .15s;background:#150c06;min-height:150px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:.4rem}
+.slot:hover{border-color:#6bafc4;background:rgba(107,175,196,.04)}
+.slot.filled{border-style:solid;border-color:#d4a56a;padding:.3rem}
+.slot input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.slot .icon{font-size:1.4rem;opacity:.5}
+.slot .txt{font-size:.7rem;color:#a89578;font-family:Georgia,serif}
+.slot .txt strong{color:#6bafc4}
+.slot img{max-width:100%;max-height:130px;border-radius:3px;display:block;object-fit:cover}
+.slot .rm{position:absolute;top:3px;right:3px;background:rgba(196,69,54,.85);color:#fff;border:none;border-radius:3px;width:20px;height:20px;font-size:.65rem;cursor:pointer;z-index:2}
+.control-panel{background:linear-gradient(135deg,rgba(107,175,196,.06),rgba(212,165,106,.04));border:1px solid #3d2418;border-left:3px solid #6bafc4;border-radius:5px;padding:1.1rem;margin-bottom:1rem}
+.progress-bar{height:6px;background:#150c06;border-radius:3px;overflow:hidden;margin-top:.7rem}
+.progress-bar .fill{height:100%;background:linear-gradient(90deg,#6bafc4,#d4a56a,#e87b35);width:0%;transition:width .3s;border-radius:3px}
+.progress-bar .fill.done{background:linear-gradient(90deg,#10b981,#34d399)}
+.batch-info{display:flex;gap:.75rem;flex-wrap:wrap;font-size:.7rem;font-family:ui-monospace,monospace;color:#8a7a5c;margin-top:.6rem;padding-top:.6rem;border-top:1px solid #3d2418}
+.batch-info strong{color:#6bafc4}
+.grid{display:grid;grid-template-columns:1fr;gap:1rem}
+@media(min-width:640px){.grid{grid-template-columns:1fr 1fr}}
+@media(min-width:1024px){.grid{grid-template-columns:1fr 1fr 1fr}}
+@media(min-width:1400px){.grid{grid-template-columns:1fr 1fr 1fr 1fr}}
+.photo{background:#231409;border:1px solid #3d2418;border-radius:4px;overflow:hidden;display:flex;flex-direction:column;transition:border-color .3s,box-shadow .3s}
+.photo.pending{border-color:#4a3828;opacity:.9}
+.photo.generating{border-color:#d4a56a;box-shadow:0 0 16px rgba(212,165,106,.35)}
+.photo.done{border-color:#6bafc4}
+.photo.error{border-color:#7f1d1d}
+.photo-img{aspect-ratio:9/16;background:#0a0603;display:flex;align-items:center;justify-content:center;position:relative;min-height:280px}
+.photo-img img{width:100%;height:100%;object-fit:contain;display:block;animation:fadeIn .4s ease}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.photo-img .load{width:100%;height:100%;background:#0a0603;display:flex;align-items:center;justify-content:center;color:#4a3828;font-size:.72rem;font-family:ui-monospace,monospace;position:relative;overflow:hidden;flex-direction:column;gap:.5rem;padding:1rem;text-align:center}
+.photo-img .load::after{content:'';position:absolute;inset:0;background:linear-gradient(110deg,transparent 30%,rgba(107,175,196,.08) 50%,transparent 70%);animation:shim 1.8s linear infinite;pointer-events:none}
+@keyframes shim{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+.photo-img .load .spin{width:22px;height:22px;border:2px solid rgba(212,165,106,.25);border-top-color:#d4a56a;border-radius:50%;animation:spin .8s linear infinite;margin-bottom:.4rem}
+@keyframes spin{to{transform:rotate(360deg)}}
+.photo-img .load .gen-title{font-size:.75rem;color:#d4a56a;font-weight:700;letter-spacing:.1em;text-transform:uppercase;font-family:Georgia,serif}
+.photo-img .err{width:100%;height:100%;background:rgba(196,69,54,.1);display:flex;align-items:center;justify-content:center;color:#f87171;font-size:.7rem;text-align:center;padding:.6rem;flex-direction:column;gap:.3rem}
+.photo-img .err small{color:#a89578;font-size:.6rem;font-family:ui-monospace,monospace}
+.photo-meta{padding:.7rem;border-top:1px solid #3d2418;flex:1;display:flex;flex-direction:column;gap:.4rem}
+.pbadge{display:inline-block;font-size:.55rem;text-transform:uppercase;letter-spacing:.12em;padding:.15rem .5rem;border-radius:2px;margin-right:.3rem;margin-bottom:.3rem;font-weight:700;border:1px solid;font-family:ui-monospace,monospace}
+.pbadge.gen{background:rgba(107,175,196,.12);color:#6bafc4;border-color:#2b5a6b}
+.pbadge.act{background:rgba(232,123,53,.12);color:#e87b35;border-color:#e87b35}
+.ptitle{font-family:Georgia,serif;font-size:.9rem;color:#e8dcc8;margin-bottom:.3rem;line-height:1.3;font-style:italic}
+.pblock{background:#150c06;border:1px solid #3d2418;border-radius:4px;padding:.5rem;position:relative;margin-top:auto}
+.plabel{font-size:.55rem;text-transform:uppercase;letter-spacing:.12em;color:#8a7a5c;font-family:ui-monospace,monospace;margin-bottom:.35rem}
+.ptext{font-size:.58rem;color:#a89578;font-family:ui-monospace,monospace;line-height:1.45;max-height:100px;overflow-y:auto;white-space:pre-wrap;word-break:break-word;padding-right:3rem}
+.pcopy{position:absolute;top:.4rem;right:.4rem;font-size:.55rem;padding:.15rem .4rem;border:1px solid #3d2418;border-radius:2px;background:transparent;color:#8a7a5c;cursor:pointer}
+.pcopy:hover{color:#e8dcc8;border-color:#d4a56a}
+.popen{display:block;text-align:center;margin-top:.4rem;font-size:.58rem;text-transform:uppercase;letter-spacing:.15em;padding:.4rem;border:1px solid #3d2418;border-radius:4px;color:#a89578;text-decoration:none}
+.popen:hover{color:#e8dcc8;border-color:#d4a56a}
+.film-timeline{display:flex;gap:2px;margin-bottom:1rem;overflow-x:auto;padding-bottom:.5rem}
+.film-timeline .frame{width:28px;height:50px;border-radius:2px;background:#150c06;border:1px solid #3d2418;display:flex;align-items:center;justify-content:center;font-size:.5rem;color:#4a3828;flex-shrink:0;cursor:pointer}
+.film-timeline .frame.done{border-color:#6bafc4;background:rgba(107,175,196,.15);color:#6bafc4}
+.film-timeline .frame.generating{border-color:#d4a56a;background:rgba(212,165,106,.15);color:#d4a56a}
+.film-timeline .frame.error{border-color:#7f1d1d;background:rgba(196,69,54,.15);color:#f87171}
+.panel{position:fixed;bottom:0;left:0;right:0;z-index:40}
+.handle{background:#231409;border-top:2px solid #d4a56a;padding:.55rem 1rem;display:flex;justify-content:space-between;align-items:center;cursor:pointer;user-select:none;gap:.5rem}
+.handle .toggle{font-family:ui-monospace,monospace;font-size:.72rem;color:#6bafc4;letter-spacing:.1em;flex-shrink:0}
+.handle .latest{font-size:.72rem;color:#a89578;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;text-align:left;padding-left:.5rem}
+.handle button{font-size:.6rem;padding:.2rem .5rem;border:1px solid #3d2418;border-radius:3px;background:transparent;color:#8a7a5c;cursor:pointer;font-family:-apple-system,sans-serif}
+.handle button:hover{color:#6bafc4;border-color:#6bafc4}
+.panel-content{background:#150c06;border-top:1px solid #3d2418;max-height:55vh;overflow-y:auto}
+.panel-content.hidden{display:none}
+.human-log{max-height:100px;overflow-y:auto;padding:.6rem 1rem;border-bottom:1px solid #3d2418;font-family:ui-monospace,monospace;font-size:.7rem}
+.human-log>div{margin-bottom:.2rem}
+.human-log .t{color:#4a3828}
+.human-log .m{color:#a88b4a}
+.debug-log{max-height:240px;overflow-y:auto;padding:.6rem 1rem;font-family:ui-monospace,monospace;font-size:.66rem;line-height:1.5}
+.debug-log>div{margin-bottom:.15rem;word-break:break-word}
+.debug-log .t{color:#4a3828}
+.debug-log .info{color:#a89578}
+.debug-log .ok{color:#a88b4a}
+.debug-log .warn{color:#e5c15a}
+.debug-log .err{color:#f87171}
+.debug-log .api{color:#6bafc4}
+.toast{position:fixed;top:1rem;left:50%;transform:translateX(-50%) translateY(-120px);background:#231409;border:1px solid #3d2418;border-left:3px solid #6bafc4;border-radius:4px;padding:.75rem 1.2rem;font-size:.8rem;z-index:1000;opacity:0;transition:transform .3s,opacity .3s;max-width:90vw;text-align:center;font-family:Georgia,serif}
+.toast.visible{transform:translateX(-50%) translateY(0);opacity:1}
+.toast.success{border-left-color:#10b981}
+.toast.error{border-left-color:#c44536}
+.toast.warn{border-left-color:#e5c15a}
+.status-bar{position:fixed;bottom:60px;left:0;right:0;background:#231409;border-top:1px solid #3d2418;padding:.5rem 1rem;font-size:.7rem;font-family:ui-monospace,monospace;color:#e8dcc8;display:flex;align-items:center;gap:.5rem;transform:translateY(100%);transition:transform .3s;z-index:30}
+.status-bar.visible{transform:translateY(0)}
+.status-bar .spinner{width:12px;height:12px;border:2px solid rgba(212,165,106,.2);border-top-color:#d4a56a;border-radius:50%;animation:spin .8s linear infinite}
+.keys-panel{display:flex;flex-wrap:wrap;gap:.4rem;margin-top:.5rem}
+.key-chip{font-size:.6rem;padding:.2rem .5rem;border:1px solid #3d2418;border-radius:3px;background:#150c06;color:#8a7a5c;font-family:ui-monospace,monospace;display:flex;align-items:center;gap:.3rem}
+.key-chip .dot{width:5px;height:5px;border-radius:50%;background:#10b981}
+.key-chip.slow .dot{background:#e5c15a}
+.key-chip.dead .dot{background:#c44536}
+.progress-pct{font-family:Georgia,serif;font-size:1.1rem;color:#6bafc4;text-align:center;margin-top:.5rem}
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:#150c06}
+::-webkit-scrollbar-thumb{background:#4a3828;border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:#6bafc4}
+.hidden{display:none!important}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+<div class="kata">✦ Moebius Film Generator ✦</div>
+<h1>Bibliothèque Film — 100 Images</h1>
+<p class="sub">Pipeline img→txt→img · 100 frames cinématiques · Style Moebius · Multi-Keys</p>
+</header>
+
+<div class="banner">
+<strong>Pipeline :</strong> Vos images → extraction texte (sujet, personnages, décors) → génération de <strong>100 images cinématiques</strong> en style Moebius formant un film complet. Chaque image est générée exclusivement par <strong>texte→image</strong> (jamais img→img). Les 100 frames constituent une bibliothèque narrative liée à vos visuels.
+</div>
+
+<section class="card">
+<div class="card-head"><span>🔑 Clés API (Multi-Key Optimisé)</span><span class="badge" id="keyBadge">0 clés</span></div>
+<div class="card-body">
+<textarea id="keysInput" placeholder="Collez vos clés API ici, une par ligne :&#10;sk-xxxxxxxxxxxx&#10;sk-yyyyyyyyyyyy&#10;sk-zzzzzzzzzzzz" autocomplete="off" spellcheck="false"></textarea>
+<div class="row">
+<button class="btn btn-amber" id="validateBtn">⚡ Valider (parallèle) et enregistrer</button>
+<button class="btn btn-slate" id="clearKeysBtn" style="width:auto;min-width:80px;">Effacer</button>
+</div>
+<div class="keys-panel" id="keysPanel"></div>
+<div class="status" id="keyStatus"><span class="dot"></span><span id="keyStatusText">Aucune clé enregistrée</span></div>
+<div class="hint">Les clés sont validées en parallèle. Rotation adaptative par score de santé. Failover automatique.</div>
+</div>
+</section>
+
+<section class="card">
+<div class="card-head"><span>🖼️ Images de Référence (Sujets du Film)</span><span class="badge" id="refBadge">0 image</span></div>
+<div class="card-body">
+<div class="images-grid" id="imagesGrid"></div>
+<div class="row" style="margin-top:.2rem;">
+<button class="btn btn-slate" id="addImageBtn" style="flex:1;">＋ Ajouter une image</button>
+</div>
+<div class="row">
+<button class="btn btn-amber" id="analyzeBtn" disabled>🔍 1. Extraire les Sujets (img→txt)</button>
+</div>
+<div class="status" id="analyzeStatus"><span class="dot"></span><span id="analyzeStatusText">En attente d'images</span></div>
+<div id="subjectDescriptions" style="margin-top:1rem; display:none;">
+<h4 style="font-family:Georgia; color:#6bafc4; margin-bottom:0.5rem; font-size:0.9rem;">Sujets extraits (modifiables) :</h4>
+<div id="descriptionsList"></div>
+<div class="row" style="margin-top:.8rem;">
+<input type="number" id="filmLength" value="100" min="10" max="200" style="width:70px;background:#150c06;border:1px solid #3d2418;border-radius:3px;padding:.4rem .5rem;color:#e8dcc8;font-size:.75rem;font-family:ui-monospace,monospace;">
+<span style="font-size:.7rem;color:#8a7a5c;align-self:center;">frames</span>
+</div>
+<button class="btn btn-mega" id="generateBtn" style="margin-top:1rem;" disabled>✦ 2. Générer le Film (txt→img)</button>
+</div>
+</div>
+</section>
+
+<section class="card hidden" id="resultsCard">
+<div class="card-head"><span>🎬 Bibliothèque Film</span><span class="badge" id="resultsBadge">0 / 100</span></div>
+<div class="card-body">
+<div class="film-timeline" id="filmTimeline"></div>
+<div class="progress-bar"><div class="fill" id="progressFill"></div></div>
+<div class="progress-pct" id="progressPct">0%</div>
+<div class="batch-info" id="batchInfo"></div>
+<div class="grid" id="resultsGrid"></div>
+</div>
+</section>
+
+</div>
+
+<div class="panel">
+<div class="handle" id="panelHandle">
+<span class="toggle" id="panelToggle">▼ CONSOLE</span>
+<span class="latest" id="humanLatest">Prêt.</span>
+<button id="copyConsoleBtn">Copier</button>
+<button id="clearConsoleBtn">Effacer</button>
+</div>
+<div class="panel-content hidden" id="panelContent">
+<div class="human-log" id="humanLog"></div>
+<div class="debug-log" id="debugLog"></div>
+</div>
+</div>
+
+<div class="toast" id="toast"><span id="toastText">Message</span></div>
+<div class="status-bar" id="statusBar"><div class="spinner"></div><span id="statusText">Préparation…</span></div>
+
+<script>
+'use strict';
+
+// ============================================================
+// CONFIG — Optimisé pour vitesse et puissance
+// ============================================================
+const API_BASE = 'https://apihub.agnes-ai.com/v1';
+const MODEL_TEXT = 'agnes-2.5-flash';
+const MODEL_IMAGE = 'agnes-image-2.5-flash';
+const IMAGE_SIZE = '1024x1792';
+const MAX_CONCURRENT = 6;
+const MAX_ATTEMPTS = 8;
+const VISION_TIMEOUT = 60000;
+const IMAGE_TIMEOUT = 180000;
+const KEY_ROTATION_THRESHOLD = 429;
+const ADAPTIVE_DELAY = 3000;
+const WORKER_COUNT = 6;
+
+const MOEBIUS_STYLE = "Drawn in the style of a 1970s Franco-Belgian sci-fi comic (Moebius, Métal Hurlant). Clean, unbroken 'ligne claire' ink contours with intricate fine cross-hatching for texture. Muted dusty pastel color palette: pale ochre, rose, soft turquoise, pale yellow. Atmospheric perspective, deep silence, surrealism, detailed linework, flat color fills with subtle gradients, masterpiece illustration.";
+
+// ============================================================
+// STATE
+// ============================================================
+const state = {
+  apiKeys: [],
+  keyHealth: [],
+  keyScores: [],
+  images: [],
+  imageNames: [],
+  subjects: [],
+  results: [],
+  isRunning: false,
+  stopRequested: false,
+  activeRequests: 0,
+  humanLog: [],
+  debugLog: []
+};
+
+// ============================================================
+// UTILS
+// ============================================================
+const $ = id => document.getElementById(id);
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const nowTime = () => new Date().toLocaleTimeString('fr-FR', { hour12: false });
+const sanitize = t => String(t == null ? '' : t).replace(/[\u2018\u2019\u201B\u2032\u02BC]/g, "'").replace(/[\u201C\u201D\u201F\u2033]/g, '"').replace(/\u2013|\u2014/g, '-').replace(/\u2026/g, '...').replace(/[\u200B-\u200D\uFEFF]/g, '').replace(/\u00A0|\u202F/g, ' ');
+
+function human(msg) {
+  state.humanLog.push({ t: nowTime(), m: msg });
+  if (state.humanLog.length > 100) state.humanLog.shift();
+  const el = $('humanLatest'); if (el) el.textContent = msg;
+  renderHuman();
+}
+function renderHuman() {
+  const el = $('humanLog'); if (!el) return;
+  el.innerHTML = state.humanLog.slice(-40).map(e => `<div><span class="t">${e.t}</span> <span class="m">${esc(e.m)}</span></div>`).join('');
+  el.scrollTop = el.scrollHeight;
+}
+function debug(msg, level = 'info') {
+  state.debugLog.push({ t: nowTime(), m: msg, c: level });
+  if (state.debugLog.length > 500) state.debugLog.shift();
+  renderDebug();
+}
+function renderDebug() {
+  const el = $('debugLog'); if (!el) return;
+  el.innerHTML = state.debugLog.slice(-200).map(e => `<div><span class="t">${e.t}</span> <span class="${e.c}">${esc(e.m)}</span></div>`).join('');
+  el.scrollTop = el.scrollHeight;
+}
+function toast(msg, type = 'success', dur = 2500) {
+  const t = $('toast');
+  t.className = `toast ${type} visible`;
+  $('toastText').textContent = msg;
+  clearTimeout(t._tid);
+  t._tid = setTimeout(() => { t.className = `toast ${type}`; }, dur);
+}
+function setStatus(txt) {
+  const b = $('statusBar');
+  if (txt) { b.classList.add('visible'); $('statusText').textContent = txt; }
+  else b.classList.remove('visible');
+}
+
+// ============================================================
+// MULTI-KEY SYSTEM — Optimisé : validation parallèle, rotation adaptative, failover
+// ============================================================
+function isValidKey(k) { return typeof k === 'string' && k.startsWith('sk-') && k.length >= 15; }
+
+async function quickPing(key) {
+  try {
+    const res = await fetch(API_BASE + '/chat/completions', {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${key}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ model: MODEL_TEXT, messages: [{ role: 'user', content: 'ok' }], max_tokens: 1 })
+    });
+    return res.status !== 401 && res.status !== 403;
+  } catch (e) { return null; }
+}
+
+async function validateAndSaveKeys() {
+  const raw = $('keysInput').value.split('\n').map(l => l.trim()).filter(l => l.length > 0).filter(l => isValidKey(l));
+  if (raw.length === 0) return toast('Aucune clé valide format', 'error');
+  $('validateBtn').disabled = true;
+  $('validateBtn').textContent = '⚡ Validation parallèle…';
+  human(`⚡ Validation de ${raw.length} clés en parallèle…`);
+  debug(`${raw.length} clés à valider`, 'api');
+
+  const results = await Promise.allSettled(raw.map(k => quickPing(k)));
+  state.apiKeys = [];
+  state.keyHealth = [];
+  state.keyScores = [];
+
+  results.forEach((r, i) => {
+    if (r.status === 'fulfilled' && r.value) {
+      state.apiKeys.push(raw[i]);
+      state.keyHealth.push({ dead: false, lastSuccess: Date.now(), last429: 0, consecutiveErrors: 0 });
+      state.keyScores.push(100);
+    } else if (r.status === 'fulfilled' && r.value === false) {
+      debug(`Clé ${i+1} rejetée (auth)`, 'err');
+    }
+  });
+
+  $('validateBtn').disabled = false;
+  $('validateBtn').textContent = '⚡ Valider (parallèle) et enregistrer';
+  $('keyBadge').textContent = `${state.apiKeys.length} clés`;
+  $('keyStatus').className = state.apiKeys.length > 0 ? 'status ok' : 'status err';
+  $('keyStatusText').textContent = state.apiKeys.length > 0 ? `${state.apiKeys.length} clé(s) opérationnelle(s)` : 'Aucune clé valide';
+  renderKeysPanel();
+  updateUI();
+  human(`✅ ${state.apiKeys.length} clés prêtes.`);
+}
+
+function renderKeysPanel() {
+  const panel = $('keysPanel');
+  panel.innerHTML = state.apiKeys.map((k, i) => {
+    const h = state.keyHealth[i];
+    const cls = h && h.consecutiveErrors >= 3 ? 'dead' : (h && h.last429 > 0 ? 'slow' : '');
+    return `<div class="key-chip ${cls}"><span class="dot"></span>key-${i+1} [${k.slice(0,8)}…]</div>`;
+  }).join('');
+}
+
+function getBestKey() {
+  if (state.apiKeys.length === 0) return null;
+  let bestIdx = 0, bestScore = -Infinity;
+  for (let i = 0; i < state.apiKeys.length; i++) {
+    const h = state.keyHealth[i];
+    if (h.dead) continue;
+    let score = state.keyScores[i] || 100;
+    if (h.consecutiveErrors > 0) score -= h.consecutiveErrors * 15;
+    if (h.last429 && Date.now() - h.last429 < 60000) score -= 40;
+    if (Date.now() - h.lastSuccess < 10000) score += 20;
+    if (score > bestScore) { bestScore = score; bestIdx = i; }
+  }
+  return { key: state.apiKeys[bestIdx], idx: bestIdx };
+}
+
+function markKeySuccess(idx) {
+  state.keyHealth[idx].consecutiveErrors = 0;
+  state.keyHealth[idx].lastSuccess = Date.now();
+  state.keyScores[idx] = Math.min(100, (state.keyScores[idx] || 50) + 5);
+}
+
+function markKeyFail(idx, is429) {
+  state.keyHealth[idx].consecutiveErrors++;
+  if (is429) state.keyHealth[idx].last429 = Date.now();
+  state.keyScores[idx] = Math.max(0, (state.keyScores[idx] || 50) - 10);
+  if (state.keyHealth[idx].consecutiveErrors >= 5) {
+    state.keyHealth[idx].dead = true;
+    debug(`Clé-${idx+1} marquée morte (${state.keyHealth[idx].consecutiveErrors} erreurs consécutives)`, 'err');
+  }
+  renderKeysPanel();
+}
+
+// ============================================================
+// IMAGES UPLOAD
+// ============================================================
+function compressImg(dataUrl, maxSide) {
+  return new Promise(res => {
+    const img = new Image();
+    img.onload = () => {
+      let { width: w, height: h } = img;
+      const s = Math.min(1, maxSide / Math.max(w, h));
+      w = Math.round(w * s); h = Math.round(h * s);
+      const c = document.createElement('canvas');
+      c.width = w; c.height = h;
+      const x = c.getContext('2d');
+      x.fillStyle = '#fff'; x.fillRect(0, 0, w, h);
+      x.drawImage(img, 0, 0, w, h);
+      res(c.toDataURL('image/jpeg', 0.85));
+    };
+    img.onerror = () => res(dataUrl);
+    img.src = dataUrl;
+  });
+}
+
+async function handleImageFile(file) {
+  if (!file || !file.type.startsWith('image/')) return toast('Fichier invalide', 'error');
+  const dataUrl = await new Promise((res) => {
+    const r = new FileReader();
+    r.onload = e => res(e.target.result);
+    r.readAsDataURL(file);
+  });
+  const compressed = await compressImg(dataUrl, 1024);
+  state.images.push(compressed);
+  state.imageNames.push(file.name);
+  refreshImagesGrid();
+  human(`📷 Image ajoutée : ${file.name}`);
+}
+
+function refreshImagesGrid() {
+  const grid = $('imagesGrid');
+  grid.innerHTML = '';
+  state.images.forEach((img, i) => {
+    const slot = document.createElement('div');
+    slot.className = 'slot filled';
+    slot.innerHTML = `<button class="rm" data-rm="${i}">✕</button><img src="${img}" alt="">`;
+    grid.appendChild(slot);
+  });
+  const addSlot = document.createElement('div');
+  addSlot.className = 'slot';
+  addSlot.innerHTML = `<input type="file" accept="image/*" multiple><div class="icon">＋</div><div class="txt"><strong>Ajouter</strong></div>`;
+  addSlot.querySelector('input').onchange = (e) => {
+    Array.from(e.target.files).forEach(f => handleImageFile(f));
+    e.target.value = '';
+  };
+  grid.appendChild(addSlot);
+
+  grid.querySelectorAll('[data-rm]').forEach(b => {
+    b.onclick = (e) => {
+      e.stopPropagation();
+      const i = parseInt(b.dataset.rm);
+      state.images.splice(i, 1);
+      state.imageNames.splice(i, 1);
+      state.subjects = [];
+      $('subjectDescriptions').style.display = 'none';
+      refreshImagesGrid();
+    };
+  });
+  $('refBadge').textContent = `${state.images.length} image${state.images.length > 1 ? 's' : ''}`;
+  updateUI();
+}
+
+// ============================================================
+// CONCURRENCE OPTIMISÉE
+// ============================================================
+async function acquireSlot() {
+  while (state.activeRequests >= MAX_CONCURRENT) await sleep(100);
+  state.activeRequests++;
+}
+function releaseSlot() { state.activeRequests = Math.max(0, state.activeRequests - 1); }
+
+// ============================================================
+// API — img→txt (vision)
+// ============================================================
+async function apiVision(system, user, imageUrl) {
+  await acquireSlot();
+  for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
+    if (state.stopRequested) { releaseSlot(); throw new Error('Stop'); }
+    const bk = getBestKey();
+    if (!bk) { releaseSlot(); throw new Error('Aucune clé active'); }
+    const key = bk.key;
+    const controller = new AbortController();
+    const tid = setTimeout(() => controller.abort(), VISION_TIMEOUT);
+    try {
+      const res = await fetch(API_BASE + '/chat/completions', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${key}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: MODEL_TEXT,
+          messages: [
+            { role: 'system', content: sanitize(system) },
+            { role: 'user', content: [{ type: 'text', text: sanitize(user) }, { type: 'image_url', image_url: { url: imageUrl } }] }
+          ],
+          temperature: 0.2,
+          max_tokens: 300
+        }),
+        signal: controller.signal
+      });
+      clearTimeout(tid);
+      if (res.status === 401 || res.status === 403) { markKeyFail(bk.idx, false); await sleep(500); continue; }
+      if (res.status === 429) { markKeyFail(bk.idx, true); await sleep(ADAPTIVE_DELAY * (attempt + 1)); continue; }
+      if (!res.ok) { markKeyFail(bk.idx, false); await sleep(2000 * (attempt + 1)); continue; }
+      markKeySuccess(bk.idx);
+      releaseSlot();
+      const d = await res.json();
+      const content = d.choices?.[0]?.message?.content;
+      if (!content) throw new Error('Réponse vide');
+      return content;
+    } catch (e) {
+      clearTimeout(tid);
+      if (e.name === 'AbortError') { markKeyFail(bk.idx, false); await sleep(1000 * (attempt + 1)); continue; }
+      if (attempt === MAX_ATTEMPTS - 1) { releaseSlot(); throw e; }
+      await sleep(1000 * (attempt + 1));
+    }
+  }
+  releaseSlot();
+  throw new Error('Échec vision après ' + MAX_ATTEMPTS + ' tentatives');
+}
+
+// ============================================================
+// API — txt→img (génération, JAMAIS img→img)
+// ============================================================
+async function apiImageGenerate(prompt) {
+  await acquireSlot();
+  for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
+    if (state.stopRequested) { releaseSlot(); throw new Error('Stop'); }
+    const bk = getBestKey();
+    if (!bk) { releaseSlot(); throw new Error('Aucune clé active'); }
+    const key = bk.key;
+    const controller = new AbortController();
+    const tid = setTimeout(() => controller.abort(), IMAGE_TIMEOUT);
+    try {
+      const res = await fetch(API_BASE + '/images/generations', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${key}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: MODEL_IMAGE,
+          prompt: sanitize(prompt),
+          size: IMAGE_SIZE,
+          n: 1,
+          extra_body: { response_format: 'url' }
+        }),
+        signal: controller.signal
+      });
+      clearTimeout(tid);
+      if (res.status === 401 || res.status === 403) { markKeyFail(bk.idx, false); await sleep(500); continue; }
+      if (res.status === 429 || res.status === 503) { markKeyFail(bk.idx, true); await sleep(Math.min(30000, ADAPTIVE_DELAY * Math.pow(2, attempt))); continue; }
+      if (!res.ok) {
+        const t = await res.text();
+        markKeyFail(bk.idx, false);
+        if (attempt === MAX_ATTEMPTS - 1) { releaseSlot(); throw new Error(`HTTP ${res.status} ${t.slice(0, 100)}`); }
+        await sleep(3000 * (attempt + 1));
+        continue;
+      }
+      markKeySuccess(bk.idx);
+      const d = await res.json();
+      const item = d.data?.[0];
+      if (item?.url) { releaseSlot(); return item.url; }
+      if (item?.b64_json) { releaseSlot(); return `data:image/png;base64,${item.b64_json}`; }
+      markKeyFail(bk.idx, false);
+      await sleep(2000);
+    } catch (e) {
+      clearTimeout(tid);
+      if (e.name === 'AbortError') { markKeyFail(bk.idx, true); await sleep(5000 * (attempt + 1)); continue; }
+      if (attempt === MAX_ATTEMPTS - 1) { releaseSlot(); throw e; }
+      await sleep(3000 * (attempt + 1));
+    }
+  }
+  releaseSlot();
+  throw new Error('Échec génération après ' + MAX_ATTEMPTS + ' tentatives');
+}
+
+// ============================================================
+// FILM STRUCTURE — 100 frames cinématiques
+// ============================================================
+function buildFilmPrompts(subjects, totalFrames) {
+  const prompts = [];
+  const perAct = Math.ceil(totalFrames / 5);
+
+  for (let i = 0; i < totalFrames; i++) {
+    const act = Math.floor(i / perAct);
+    const actName = ['Ouverture', 'Montée en tension', 'Point de bascule', 'Résolution', 'Dénouement'][act] || `Acte ${act + 1}`;
+    const subIdx = i % subjects.length;
+    const subject = subjects[subIdx];
+
+    const narrativeBeats = [
+      `Close-up establishing shot, ${subject}. The scene breathes with quiet mystery.`,
+      `Medium shot, ${subject}. A figure moves through the environment, purpose unknown.`,
+      `Wide cinematic framing, ${subject}. The world expands into surreal depth.`,
+      `Dynamic composition, ${subject}. Tension builds, shadows lengthen.`,
+      `Climactic wide shot, ${subject}. Everything converges, silence before the storm.`,
+      `Intimate detail, ${subject}. A single object tells the whole story.`,
+      `Panoramic vista, ${subject}. The horizon stretches infinitely, dust and light.`,
+      `Reveal shot, ${subject}. What was hidden emerges into pale focus.`,
+      `Transition frame, ${subject}. The scene dissolves into pure atmosphere.`,
+      `Heroic pose, ${subject}. Standalone, against an endless backdrop.`
+    ];
+
+    const beat = narrativeBeats[i % narrativeBeats.length];
+    const prompt = `${MOEBIUS_STYLE} Cinematic frame ${i + 1}/${totalFrames}, Act: ${actName}. ${beat}`;
+    prompts.push({ prompt, act: actName, subject, frame: i + 1 });
+  }
+  return prompts;
+}
+
+// ============================================================
+// ÉTAPE 1 : ANALYSE (img→txt)
+// ============================================================
+async function analyzeImages() {
+  if (state.images.length === 0) return;
+  $('analyzeBtn').disabled = true;
+  $('subjectDescriptions').style.display = 'none';
+  human(`🔍 Extraction texte de ${state.images.length} images…`);
+  setStatus('Extraction img→txt en cours…');
+
+  state.subjects = [];
+  const sysPrompt = "You are an objective scene describer for a film production. Describe ONLY the physical narrative content: characters (appearance, pose, action), objects, environment. Do NOT mention art style, medium, color palette, or illustration techniques. Describe as if writing a screenplay scene direction. Keep under 40 words per image.";
+
+  const tasks = state.images.map((img, i) =>
+    apiVision(sysPrompt, "Extract the narrative content of this frame for a film script. Focus on what is happening, who is present, where they are.", img).then(desc => {
+      debug(`Sujet ${i + 1} : ${desc.slice(0, 120)}…`, 'ok');
+      return desc.trim();
+    }).catch(e => {
+      debug(`Erreur extraction ${i + 1} : ${e.message}`, 'err');
+      return "A lone figure in a vast alien landscape, distant horizon, silence.";
+    })
+  );
+
+  const descs = await Promise.allSettled(tasks);
+  descs.forEach((d, i) => {
+    $('analyzeStatusText').textContent = `Extraction ${i + 1}/${state.images.length}…`;
+    state.subjects.push(d.status === 'fulfilled' ? d.value : "A mysterious scene with a solitary figure.");
+  });
+
+  renderDescriptions();
+  $('analyzeStatus').className = 'status ok';
+  $('analyzeStatusText').textContent = `${state.subjects.length} sujets extraits. Modifiables.`;
+  $('subjectDescriptions').style.display = 'block';
+  human('✅ Extraction terminée.');
+  setStatus(null);
+  updateUI();
+}
+
+function renderDescriptions() {
+  const list = $('descriptionsList');
+  list.innerHTML = '';
+  state.subjects.forEach((sub, i) => {
+    const div = document.createElement('div');
+    div.style.marginBottom = '0.6rem';
+    div.innerHTML = `
+      <label style="font-size:0.7rem;color:#8a7a5c;display:block;margin-bottom:0.25rem;">Sujet ${i + 1} :</label>
+      <textarea class="subject-input" data-idx="${i}" style="min-height:50px;font-size:0.72rem;">${esc(sub)}</textarea>
+    `;
+    list.appendChild(div);
+  });
+  list.querySelectorAll('.subject-input').forEach(ta => {
+    ta.oninput = () => { state.subjects[ta.dataset.idx] = ta.value; };
+  });
+}
+
+// ============================================================
+// ÉTAPE 2 : GÉNÉRATION FILM (txt→img, JAMAIS img→img)
+// ============================================================
+async function generateFilm() {
+  if (state.subjects.length === 0) return;
+  const totalFrames = Math.max(10, Math.min(200, parseInt($('filmLength').value) || 100));
+
+  $('generateBtn').disabled = true;
+  $('resultsCard').classList.remove('hidden');
+  const grid = $('resultsGrid');
+  grid.innerHTML = '';
+  const timeline = $('filmTimeline');
+  timeline.innerHTML = '';
+
+  const prompts = buildFilmPrompts(state.subjects, totalFrames);
+  state.results = prompts.map(p => ({ ...p, status: 'pending', url: null }));
+
+  // Timeline
+  state.results.forEach((_, i) => {
+    const f = document.createElement('div');
+    f.className = 'frame';
+    f.id = `tf-${i}`;
+    f.textContent = i + 1;
+    f.title = prompts[i].prompt.slice(0, 80);
+    f.onclick = () => { const el = $(`card-${i}`); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' }); };
+    timeline.appendChild(f);
+  });
+
+  // Grid cards
+  state.results.forEach((r, i) => {
+    const card = document.createElement('div');
+    card.className = 'photo pending';
+    card.id = `card-${i}`;
+    card.innerHTML = `
+      <div class="photo-img"><div class="load"><div class="spin"></div><div class="gen-title">Frame ${i + 1}</div></div></div>
+      <div class="photo-meta">
+        <div><span class="pbadge gen">txt→img</span><span class="pbadge act">${esc(r.act)}</span></div>
+        <div class="ptitle">Frame ${i + 1} / ${totalFrames}</div>
+        <div class="pblock"><div class="plabel">Prompt</div><div class="ptext">${esc(r.prompt)}</div></div>
+      </div>
+    `;
+    grid.appendChild(card);
+  });
+
+  updateBatchInfo(totalFrames);
+  human(`🎬 Génération de ${totalFrames} frames du film…`);
+  setStatus(`Génération ${totalFrames} images (txt→img)…`);
+
+  let idx = 0;
+  const workers = Array.from({ length: WORKER_COUNT }, () => (async function worker() {
+    while (idx < state.results.length) {
+      if (state.stopRequested) return;
+      const myIdx = idx++;
+      const res = state.results[myIdx];
+      const card = $(`card-${myIdx}`);
+      const tf = $(`tf-${myIdx}`);
+
+      if (card) { card.className = 'photo generating'; card.querySelector('.photo-img').innerHTML = `<div class="load"><div class="spin"></div><div class="gen-title">Frame ${myIdx + 1}…</div></div>`; }
+      if (tf) tf.className = 'frame generating';
+
+      try {
+        const url = await apiImageGenerate(res.prompt);
+        res.url = url;
+        res.status = 'done';
+        if (card) {
+          card.className = 'photo done';
+          card.querySelector('.photo-img').innerHTML = `<img src="${url}" loading="lazy">`;
+          card.querySelector('.photo-meta').innerHTML += `<a href="${url}" target="_blank" download class="popen">Télécharger</a>`;
+        }
+        if (tf) tf.className = 'frame done';
+        updateProgress();
+      } catch (e) {
+        res.status = 'error';
+        if (card) { card.className = 'photo error'; card.querySelector('.photo-img').innerHTML = `<div class="err">✕ Échec<br><small>${esc(e.message).slice(0, 60)}</small></div>`; }
+        if (tf) tf.className = 'frame error';
+        debug(`Frame ${myIdx + 1} échec : ${e.message}`, 'err');
+        updateProgress();
+      }
+    }
+  })());
+
+  await Promise.all(workers);
+  state.stopRequested = false;
+
+  setStatus(null);
+  $('generateBtn').disabled = false;
+  const done = state.results.filter(r => r.url).length;
+  human(`🏁 Film terminé : ${done}/${totalFrames} frames.`);
+  toast(`Film généré : ${done}/${totalFrames} frames`, done === totalFrames ? 'success' : 'warn', 4000);
+  renderKeysPanel();
+}
+
+function updateProgress() {
+  const total = state.results.length;
+  const done = state.results.filter(r => r.status === 'done').length;
+  const failed = state.results.filter(r => r.status === 'error').length;
+  const pct = Math.round(((done + failed) / total) * 100);
+  const fill = $('progressFill');
+  fill.style.width = pct + '%';
+  if (pct === 100) fill.classList.add('done');
+  $('progressPct').textContent = `${pct}%`;
+  $('resultsBadge').textContent = `${done} / ${total}`;
+  if (done % 10 === 0 && done > 0) human(`📽️ ${done}/${total} frames…`);
+}
+
+function updateBatchInfo(total) {
+  $('batchInfo').innerHTML = `
+    <span><strong>${total}</strong> frames</span>
+    <span><strong>${state.subjects.length}</strong> sujets</span>
+    <span><strong>${state.apiKeys.length}</strong> clés actives</span>
+    <span><strong>${WORKER_COUNT}</strong> workers</span>
+    <span><strong>${MAX_CONCURRENT}</strong> concurrent max</span>
+  `;
+}
+
+// ============================================================
+// BINDINGS & INIT
+// ============================================================
+function updateUI() {
+  const hasKeys = state.apiKeys.length > 0;
+  const hasImages = state.images.length > 0;
+  const hasSubjects = state.subjects.length > 0;
+  $('analyzeBtn').disabled = !hasKeys || !hasImages;
+  $('generateBtn').disabled = !hasKeys || !hasSubjects;
+}
+
+function bind() {
+  $('validateBtn').onclick = validateAndSaveKeys;
+  $('clearKeysBtn').onclick = () => {
+    state.apiKeys = []; state.keyHealth = []; state.keyScores = [];
+    $('keysInput').value = '';
+    $('keyBadge').textContent = '0 clés';
+    $('keyStatus').className = 'status';
+    $('keyStatusText').textContent = 'Aucune clé enregistrée';
+    $('keysPanel').innerHTML = '';
+    updateUI();
+  };
+  $('addImageBtn').onclick = () => {
+    const input = document.createElement('input');
+    input.type = 'file'; input.accept = 'image/*'; input.multiple = true;
+    input.onchange = (e) => { Array.from(e.target.files).forEach(f => handleImageFile(f)); };
+    input.click();
+  };
+  $('analyzeBtn').onclick = analyzeImages;
+  $('generateBtn').onclick = generateFilm;
+
+  const handle = $('panelHandle');
+  const content = $('panelContent');
+  let open = false;
+  handle.onclick = () => {
+    open = !open;
+    content.classList.toggle('hidden', !open);
+    $('panelToggle').textContent = (open ? '▲' : '▼') + ' CONSOLE';
+  };
+  $('copyConsoleBtn').onclick = () => {
+    const text = state.debugLog.map(e => `[${e.t}] ${e.m}`).join('\n');
+    navigator.clipboard.writeText(text).then(() => toast('Console copiée'));
+  };
+  $('clearConsoleBtn').onclick = () => { state.debugLog = []; state.humanLog = []; renderDebug(); renderHuman(); };
+
+  refreshImagesGrid();
+  human('✦ Film Generator prêt. Chargez vos images.');
+}
+
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bind);
+else bind();
+</script>
+</body>
+</html>
